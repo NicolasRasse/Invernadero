@@ -1,0 +1,104 @@
+```
+// Incluimos librería 
+#include <DHT.h> // para sensor temperatura 
+#include  <LiquidCrystal_I2C.h> 
+#include <Wire.h> 
+// Definimos el pin digital donde se conecta el sensor temperatura 
+#define DHTPIN 2 
+// Dependiendo del tipo de sensor 
+#define DHTTYPE DHT11 
+   
+// Inicializamos el sensor DHT11 
+DHT dht(DHTPIN, DHTTYPE); 
+LiquidCrystal_I2C lcd(0x3F, 16,2); 
+//Dibujo caracter grado 
+byte grado[8] = 
+ { 
+ 0b00001100, 
+ 0b00010010, 
+ 0b00010010, 
+ 0b00001100, 
+ 0b00000000, 
+ 0b00000000, 
+ 0b00000000, 
+ 0b00000000 
+ }; 
+//iniciamos los relay y asignamos pines 
+int relay1 = 10; 
+int relay2 = 9; 
+//int relay3 = 12; 
+//int relay4 = 3; 
+
+void setup() { 
+   
+  // Comenzamos el sensor DHT 
+  dht.begin(); 
+    
+   // Inicializar el LCD con el número de  columnas y filas del LCD 
+  lcd.clear();
+  Wire.begin();
+  lcd.backlight();
+  lcd.begin(16, 2); 
+  lcd.createChar(1, grado);// agregamos el caracter grado  
+    
+  // Escribimos el Mensaje en el LCD. 
+  lcd.setCursor(0, 0); 
+  lcd.print("Iniciando..."); 
+  lcd.setCursor(0, 1); 
+  lcd.print("NRSystem"); 
+
+  // Inicializar el pin digital relays, como salidas 
+  pinMode(relay1, OUTPUT);    
+  pinMode(relay2, OUTPUT);    
+  //pinMode(relay3, OUTPUT);    
+  //pinMode(relay4, OUTPUT); 
+
+  // Apagamos todos los relays 
+  digitalWrite(relay1, HIGH); //apagamos el relay 
+  digitalWrite(relay2, HIGH); //apagamos el relay 
+  //digitalWrite(relay3, HIGH); //apagamos el relay 
+  //digitalWrite(relay4, HIGH); //apagamos el relay 
+} 
+
+void loop() { 
+  
+    // Esperamos 5 segundos entre medidas 
+  delay(5000); 
+   
+  // Leemos la humedad relativa 
+  int h = dht.readHumidity(); 
+  // Leemos la temperatura en grados centígrados (por defecto) 
+  int t = dht.readTemperature(); 
+  // Leemos la temperatura en grados Fahreheit 
+  float f = dht.readTemperature(true); 
+   
+  // Comprobamos si ha habido algún error en la lectura 
+  if (isnan(h) || isnan(t) || isnan(f)) { 
+    //Serial.println("Error obteniendo los datos del sensor DHT11"); 
+    lcd.setCursor(0, 1); 
+    lcd.print("Error DHT11"); 
+    return; 
+  } 
+  // Escribir en LCD humedad y temperatura 
+  lcd.setCursor(0, 0); 
+  lcd.print("Humedad: "); 
+  lcd.print(h); 
+  lcd.print(" %"); 
+  lcd.setCursor(0, 1); 
+  lcd.print("Grados : "); 
+  lcd.print(t); 
+  lcd.write(1); //Imprimimos nuestro caracter Grados 
+  lcd.print("C"); 
+  //Relay : 1 //Ventilador
+  if(t>=30){ 
+    digitalWrite(relay1, HIGH); //encendemos el relay 
+  }else{ 
+    digitalWrite(relay1, LOW); //apagamos el relay 
+  } 
+  //Relay : 2 //Lampara
+  if(t<=20){  
+    digitalWrite(relay1, HIGH); //encendemos el relay  
+  }else{  
+    digitalWrite(relay1, LOW); //apagamos el relay  
+  }
+}
