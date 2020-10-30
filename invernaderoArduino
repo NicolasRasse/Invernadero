@@ -1,4 +1,7 @@
-```
+/*
+Propiedad de NicolasRasse
+*/
+
 // Incluimos librería 
 #include <DHT.h> // para sensor temperatura 
 #include  <LiquidCrystal_I2C.h> 
